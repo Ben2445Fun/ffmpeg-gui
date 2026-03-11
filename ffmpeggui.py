@@ -1,26 +1,21 @@
-from PySide6 import QtCore, QtWidgets  # , QtGui
-import random
-import sys
 """A GUI for FFMPEG
 """
 
 __authors__ = "Benjamin Arent", "Christain Tuttle"
 __data__ = "3/10/2026"
 
+from PySide6 import QtCore, QtWidgets  # , QtGui
+import sys
+import subprocess
+
 
 class FfmpegGui(QtWidgets.QWidget):
     """The GUI for ffmpeg
 
     Args:
-            QtWidgets (_type_): ???
+            QtWidgets (_type_): Parent class to create a GUI
     """
     _instance: "FfmpegGui | None" = None  # Singleton
-
-    def show(self) -> None:
-        """Something
-            """
-        self.resize(800, 600)
-        self.show()
 
     def __new__(cls) -> "FfmpegGui":
         """Create a new GUI
@@ -32,20 +27,52 @@ class FfmpegGui(QtWidgets.QWidget):
     def __init__(self) -> None:
         """Initialization of the GUI
         """
+        # Get ffmpeg
+        ffmpeg = subprocess.run(
+            ['ffmpeg', '-formats'], capture_output=True, text=True)
+        if ffmpeg.returncode == 127 or True:  # or True to test
+            # If ffmpeg not installed, pop-up requesting its installation
+            self.notin = QtWidgets.QMessageBox()
+            self.notin.setIcon(QtWidgets.QMessageBox.Icon.Critical)
+            self.notin.setText("Error")
+            self.notin.setInformativeText(
+                'FFMPEG was not found! Please install FFMPEG to continue')
+            self.notin.setWindowTitle("FFMPEG Not Found")
+            self.notin.setStandardButtons(
+                QtWidgets.QMessageBox.StandardButton.Close)
+            self.notin.addButton(
+                QtWidgets.QMessageBox.StandardButton.Help)
+            self.notin.resize(600, 200)
+            self.notin.exec()
+            exit()
         super().__init__()
-        self.hello = ["Hallo Welt", "Hei maailma", "Hola Mundo", "Привет мир"]
-
-        self.button = QtWidgets.QPushButton("Click me!")
-        self.text = QtWidgets.QLabel(
-            "Hello World", alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.input = QtWidgets.QLineEdit()
+        self.input_file = QtWidgets.QPushButton("Find File")
+        self.convert = QtWidgets.QPushButton("Convert")
         self.lt = QtWidgets.QVBoxLayout(self)
-        self.lt.addWidget(self.text)
-        self.lt.addWidget(self.button)
-        self.button.clicked.connect(self.magic)
+        self.lt.addWidget(self.input)
+        self.lt.addWidget(self.input_file)
+        self.lt.addWidget(self.convert)
+        self.input_file.clicked.connect(self.promptinputfile)
+        self.convert.clicked.connect(self.beginconversion)
+
+    def enable(self) -> None:
+        """Shows the GUI
+        """
+        self.resize(800, 600)
+        self.show()
 
     @QtCore.Slot()
-    def magic(self) -> None:
-        self.text.setText(random.choice(self.hello))
+    def beginconversion(self) -> None:
+        """Attempts the conversion
+        """
+
+    @QtCore.Slot()
+    def promptinputfile(self) -> None:
+        """Let's the user find a file via the file explorer
+        """
+        self.fileprompt = QtWidgets.QFileDialog()
+        print(self.fileprompt.getOpenFileName())
 
     @staticmethod
     def main() -> None:
@@ -53,7 +80,7 @@ class FfmpegGui(QtWidgets.QWidget):
         """
         app = QtWidgets.QApplication([])
         gui = FfmpegGui()
-        gui.show()
+        gui.enable()
         sys.exit(app.exec())
 
 
