@@ -28,23 +28,27 @@ class FfmpegGui(QtWidgets.QWidget):
         """Initialization of the GUI
         """
         # Get ffmpeg
-        ffmpeg = subprocess.run(
+    
+        #I just set it to true for testing now, but can change it to try/except later
+        if True:
+            notin = QtWidgets.QMessageBox()
+            notin.setIcon(QtWidgets.QMessageBox.Icon.Critical)
+            notin.setText("Error")
+            notin.setInformativeText(
+                "FFMPEG was not found! Please install FFMPEG to continue"
+            )
+            notin.setWindowTitle("FFMPEG Not Found")
+            install_button = notin.addButton("Install FFMPEG", QtWidgets.QMessageBox.ButtonRole.AcceptRole)
+            close_button = notin.addButton(QtWidgets.QMessageBox.StandardButton.Close)
+            notin.resize(600, 200)
+            notin.exec()
+            if notin.clickedButton() == install_button:
+                self.installffmpeg()
+            elif notin.clickButton() == close_button: 
+                exit()
+                
+            ffmpeg = subprocess.run(
             ['ffmpeg', '-formats'], capture_output=True, text=True)
-        if ffmpeg.returncode == 127 or True:  # or True to test
-            # If ffmpeg not installed, pop-up requesting its installation
-            self.notin = QtWidgets.QMessageBox()
-            self.notin.setIcon(QtWidgets.QMessageBox.Icon.Critical)
-            self.notin.setText("Error")
-            self.notin.setInformativeText(
-                'FFMPEG was not found! Please install FFMPEG to continue')
-            self.notin.setWindowTitle("FFMPEG Not Found")
-            self.notin.setStandardButtons(
-                QtWidgets.QMessageBox.StandardButton.Close)
-            self.notin.addButton(
-                QtWidgets.QMessageBox.StandardButton.Help)
-            self.notin.resize(600, 200)
-            self.notin.exec()
-            exit()
         super().__init__()
         self.input = QtWidgets.QLineEdit()
         self.input_file = QtWidgets.QPushButton("Find File")
@@ -61,6 +65,35 @@ class FfmpegGui(QtWidgets.QWidget):
         """
         self.resize(800, 600)
         self.show()
+        
+    def installffmpeg(self) -> None: 
+        platform_identifier = sys.platform
+        #probably some repetitive code in this function but will fix later
+
+        #Install ffmpeg based on platform(cant on windows rn)
+        if platform_identifier.startswith("win"):
+            msg = QtWidgets.QMessageBox()
+            msg.setWindowTitle("Installing")
+            msg.setText("You're using Windows, install online before continuing")
+            msg.setIcon(QtWidgets.QMessageBox.Icon.Information)
+            msg.exec()
+        elif platform_identifier == "linux":
+            msg = QtWidgets.QProgressDialog("Installing FFmpeg...", None, 0, 0)
+            msg.setWindowTitle("Installing")
+            msg.setLabelText("Installing FFmpeg...")
+            msg.setWindowModality(QtCore.Qt.WindowModality.ApplicationModal)
+            msg.show()
+            QtWidgets.QApplication.processEvents()
+            subprocess.run(["sudo", "apt", "install", "ffmpeg", "-y"])
+            msg.close()
+        elif platform_identifier == "darwin":
+            msg = QtWidgets.QProgressDialog("Installing FFmpeg...", None, 0, 0)
+            msg.setWindowTitle("Installing")
+            msg.setLabelText("Installing FFmpeg...")
+            msg.setWindowModality(QtCore.Qt.WindowModality.ApplicationModal)
+            subprocess.run(["brew", "install", "ffmpeg"])
+            msg.close()
+        
 
     @QtCore.Slot()
     def beginconversion(self) -> None:
