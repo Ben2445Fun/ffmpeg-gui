@@ -1,0 +1,11 @@
+services:
+  ffmpeg-gui:
+    build: .
+    environment:
+      - DISPLAY=host.docker.internal:0
+    volumes:
+      - /Users/christiantuttle/Desktop/ffmpeg-gui:/home/user/project
+      - /Users/christiantuttle/Desktop:/home/user/Desktop
+      - /Users/christiantuttle/Downloads:/home/user/Downloads
+      - /Users/christiantuttle/Documents:/home/user/Documents
+    working_dir: /home/user/project

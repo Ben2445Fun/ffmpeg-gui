@@ -7,6 +7,7 @@ __data__ = "3/10/2026"
 from PySide6 import QtCore, QtWidgets
 import sys
 import subprocess
+from installer import Installer
 
 
 class FfmpegGui(QtWidgets.QWidget):
@@ -25,34 +26,32 @@ class FfmpegGui(QtWidgets.QWidget):
         return cls._instance
 
     def __init__(self) -> None:
-        """Initialization of the GUI
-        """
         super().__init__()
         self._main_layout = QtWidgets.QVBoxLayout(self)
         # Input Section
-        self._input_label = QtWidgets.QLabel('Input', self)
-        self._input_text = QtWidgets.QLineEdit(self)
-        self._input_dialog = QtWidgets.QPushButton(self.style().standardIcon(
-            QtWidgets.QStyle.StandardPixmap.SP_DialogOpenButton), '', self)
+        self._input_label = QtWidgets.QLabel('Input')
+        self._input_text = QtWidgets.QLineEdit()
+        self._input_dialog = QtWidgets.QPushButton(
+            self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_DialogOpenButton), '')
         self._input_dialog.clicked.connect(self.promptinputfile)
-        self._input_horizontal = QtWidgets.QHBoxLayout(self)
+        self._input_horizontal = QtWidgets.QHBoxLayout()
         self._input_horizontal.addWidget(self._input_text)
         self._input_horizontal.addWidget(self._input_dialog)
-        self._input_vertical = QtWidgets.QVBoxLayout(self)
+        self._input_vertical = QtWidgets.QVBoxLayout()
         self._input_vertical.addWidget(self._input_label)
         self._input_vertical.addLayout(self._input_horizontal)
         # Output Section
-        self._output_label = QtWidgets.QLabel('Output', self)
-        self._output_text = QtWidgets.QLineEdit(self)
-        self._output_extension = QtWidgets.QComboBox(self)
-        self._output_horizontal = QtWidgets.QHBoxLayout(self)
+        self._output_label = QtWidgets.QLabel('Output')
+        self._output_text = QtWidgets.QLineEdit()
+        self._output_extension = QtWidgets.QComboBox()
+        self._output_horizontal = QtWidgets.QHBoxLayout()
         self._output_horizontal.addWidget(self._output_text)
         self._output_horizontal.addWidget(self._output_extension)
-        self._output_vertical = QtWidgets.QVBoxLayout(self)
+        self._output_vertical = QtWidgets.QVBoxLayout()
         self._output_vertical.addWidget(self._output_label)
         self._output_vertical.addLayout(self._output_horizontal)
         # Main Setup
-        self._convert_button = QtWidgets.QPushButton('Convert', self)
+        self._convert_button = QtWidgets.QPushButton('Convert')
         self._convert_button.clicked.connect(self.beginconversion)
         self._main_layout.addLayout(self._input_vertical)
         self._main_layout.addLayout(self._output_vertical)
@@ -62,7 +61,7 @@ class FfmpegGui(QtWidgets.QWidget):
             self._supported_inputs += '*.' + i + ' '
         self._supported_inputs = self._supported_inputs[:-1] + ')'
         for i in self.supported_outputs():
-            self._output_extension.addItem("."+i)
+            self._output_extension.addItem("." + i)
 
     def supported_inputs(self) -> list[str]:
         """Gets all supported input extensions
@@ -91,6 +90,8 @@ class FfmpegGui(QtWidgets.QWidget):
             except IndexError:
                 continue
             ext = ext.strip().split()
+            if not ext:         
+                continue
             if ext[0] == 'Common':
                 ext_list = ext[2].split(',')
                 if len(ext_list) > 0:
@@ -129,6 +130,8 @@ class FfmpegGui(QtWidgets.QWidget):
             except IndexError:
                 continue
             ext = ext.strip().split()
+            if not ext:         
+                continue
             if ext[0] != 'Common':
                 continue
             ext_list = ext[2].split(',')[:-1]
@@ -174,6 +177,9 @@ class FfmpegGui(QtWidgets.QWidget):
     def main() -> None:
         """The main function for the GUI
         """
+        result = subprocess.run(['ffmpeg', '-version'], capture_output=True)
+        if result.returncode != 0:
+            installer = Installer()
         app = QtWidgets.QApplication([])
         gui = FfmpegGui()
         gui.enable()
