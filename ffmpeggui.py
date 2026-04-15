@@ -2,7 +2,7 @@
 """
 
 __authors__ = "Benjamin Arent", "Christain Tuttle"
-__data__ = "3/10/2026"
+__date__ = "3/10/2026"
 
 from PySide6 import QtCore, QtWidgets
 import sys
@@ -90,7 +90,7 @@ class FfmpegGui(QtWidgets.QWidget):
             except IndexError:
                 continue
             ext = ext.strip().split()
-            if not ext:         
+            if not ext:
                 continue
             if ext[0] == 'Common':
                 ext_list = ext[2].split(',')
@@ -130,7 +130,7 @@ class FfmpegGui(QtWidgets.QWidget):
             except IndexError:
                 continue
             ext = ext.strip().split()
-            if not ext:         
+            if not ext:
                 continue
             if ext[0] != 'Common':
                 continue
